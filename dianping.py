@@ -37,7 +37,7 @@ def url_pro(dp_url):
             title = tit_a_item.get('title')
             ele1 = title + '#' + href + '\n'
             txt1_wr.write(ele1)
-            print(href)
+            #print(href)
             #time.sleep(1)
 
 
