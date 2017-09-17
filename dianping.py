@@ -1,25 +1,19 @@
 import urllib
 import requests
 import time
+
+import xlrd
 from bs4 import BeautifulSoup
 import xlwt
+from xlrd import open_workbook
+from xlutils.copy import copy
 
 
 def bs4_url(url):
 
-    #headers = {
-    #    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-    #    'Accept': 'text/html;q=0.9,*/*;q=0.8',
-    #    'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-    #    'Accept-Encoding': 'gzip',
-    #    'Connection': 'close',
-    #    'Referer': 'http://www.baidu.com/link?url=_andhfsjjjKRgEWkj7i9cFmYYGsisrnm2A-TN3XZDQXxvGsM9k9ZZSnikW2Yds4s&amp;wd=&amp;eqid=c3435a7d00006bd600000003582bfd1f'
-    #}
-
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36',
         'Accept': 'text/html, application/xhtml+xml, application/xml; q=0.9, image/webp, image/apng, */*; q=0.8',
-        #'Accept': 'application/json, text/javascript',
         'Accept-Encoding': 'gzip, deflate',
         'Connection': 'keep-alive',
         'Refer': 'http://www.dianping.com/'
@@ -31,9 +25,9 @@ def bs4_url(url):
 
 
 
-def dp_pro(dp_url):
-    txt1_wr = open('./tmp1.txt', 'w')
-    txt2_wr = open('./tmp2.txt', 'w')
+def url_pro(dp_url):
+    txt1_wr = open('./tmp1.txt', 'a')
+    txt2_wr = open('./tmp2.txt', 'a')
     dp = bs4_url(dp_url)
     dp_tit = dp.find_all('div', attrs={'class': 'tit'})
     for tit_item in dp_tit:
@@ -41,30 +35,10 @@ def dp_pro(dp_url):
         for tit_a_item in tit_a:
             href  = tit_a_item.get('href')
             title = tit_a_item.get('title')
-            #ele1 = title + '#' + href + '\n'
-            #txt1_wr.write(ele1)
-            #print(href)
+            ele1 = title + '#' + href + '\n'
+            txt1_wr.write(ele1)
+            print(href)
             #time.sleep(1)
-
-
-            href_info = bs4_url(href.encode('gbk'))
-
-            href_tel = href_info.find_all('span', attrs={'itemprop': 'tel'})
-            print(href_tel)
-            print(href_info.find_all('title'))
-            #href_val = href_info.find_all('div', attrs={'class': 'info-value'})
-            #if len(href_tel):
-            #    tel = href_tel[0].get_text()
-            #    print(href_tel[0].get_text())
-            #elif len(href_val):
-            #    tel = href_val[0].get_text()
-            #    print(href_val[0].get_text())
-            #else:
-            #    tel = 'None'
-            #    print('Null')
-
-            #ele1 = title+'#'+tel+'#'+href+'\n'
-            #txt1_wr.write(ele1)
 
 
     dp_tag = dp.find_all('div', attrs={'class': 'tag-addr'})
@@ -78,10 +52,15 @@ def dp_pro(dp_url):
     txt1_wr.close()
     txt2_wr.close()
 
-def generate_exl():
 
-    f_exl = xlwt.Workbook()
-    sheet1 = f_exl.add_sheet(u'sheet1', cell_overwrite_ok=True)
+def write_xls(exl_name):
+
+    f_exl = open_workbook(exl_name)
+    rows  = f_exl.sheets()[0].nrows
+    excel = copy(f_exl)
+    sheet1 = excel.get_sheet(0)
+
+    #sheet1 = f_exl.add_sheet(u'sheet1', cell_overwrite_ok=True)
     txt1_rd = open('./tmp1.txt', 'r')
     txt2_rd = open('./tmp2.txt', 'r')
 
@@ -91,25 +70,34 @@ def generate_exl():
         row1 = line1[i].split('#')[0]
         row2 = line1[i].split('#')[1]
         row3 = line2[i]
-        sheet1.write(i,0,row1)
-        sheet1.write(i,1,row2)
-        sheet1.write(i,2,row3)
-        exl_ele = [row1, row2, row3]
-        #print(exl_ele)
-    f_exl.save('test.xls')
-
-def get_href(href):
-    href_info = bs4_url(href)
-    href_span = href_info.find_all('span', attrs={'itemprop': 'tel'})
-    print(href_span)
+        sheet1.write(rows,0,row1)
+        sheet1.write(rows,1,row2)
+        sheet1.write(rows,2,row3)
+        rows +=1
+    excel.save(exl_name)
 
 
+def get_url(url_excel):
+    url_head = 'https://www.dianping.com/search/keyword/3/0_'
+    rd_xls = xlrd.open_workbook(url_excel)
+    sheet = rd_xls.sheets()[0]
+    nrows = sheet.nrows
+    url_list = []
+    for i in range(nrows):
+        #print(sheet.row_values(i))
+        row_val = sheet.row_values(i)
+        url_code = urllib.parse.quote(row_val[0])
+        url = url_head + url_code
+        url_list.append(url)
+        #print(url)
+    #print(url_list)
+    #print(len(url_list))
+    return url_list
 
 
-
-url_head = 'https://www.dianping.com/search/keyword/3/0_'
-url_code = urllib.parse.quote('孩儿巷220号')
-dp_url = url_head + url_code
+#url_head = 'https://www.dianping.com/search/keyword/3/0_'
+#url_code = urllib.parse.quote('孩儿巷220号')
+#dp_url = url_head + url_code
 #html = urllib.request.urlopen(dp_url)
 #print(html)
 #print(dp_url)
@@ -118,6 +106,16 @@ dp_url = url_head + url_code
 #get_info(dp_url)
 
 
-dp_pro(dp_url)
-#generate_exl()
+if __name__ == '__main__':
+    rd_xls_name = 'addr.xls'
+    wr_xls_name = 'result.xls'
+    url_list = get_url(rd_xls_name)
+    for i in range(len(url_list)):
+        url_pro(url_list[i])
+    write_xls(wr_xls_name)
+
+
+#url_pro(dp_url)
+#write_xls()
+#get_url('addr.xls')
 
