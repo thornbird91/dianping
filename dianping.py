@@ -39,17 +39,6 @@ def url_pro(dp_url):
             txt1_wr.write(ele1)
             #print(href)
             #time.sleep(1)
-            href_bs = bs4_url(href)
-            href_tit = href_bs.find_all('title')
-            print(href_tit)
-            tel = href_bs.find_all('span', attrs={'itemprop':'tel'})
-            val = href_bs.find_all('div', attrs={'class':'info-value'})
-            if(len(tel)):
-                print(tel[0].get_text())
-            elif(len(val)):
-                print(val[0].get_text())
-            else:
-                print('Null')
 
 
     dp_tag = dp.find_all('div', attrs={'class': 'tag-addr'})
@@ -106,9 +95,9 @@ def get_url(url_excel):
     return url_list
 
 
-url_head = 'https://www.dianping.com/search/keyword/3/0_'
-url_code = urllib.parse.quote('孩儿巷220号')
-dp_url = url_head + url_code
+#url_head = 'https://www.dianping.com/search/keyword/3/0_'
+#url_code = urllib.parse.quote('孩儿巷220号')
+#dp_url = url_head + url_code
 #html = urllib.request.urlopen(dp_url)
 #print(html)
 #print(dp_url)
@@ -117,16 +106,16 @@ dp_url = url_head + url_code
 #get_info(dp_url)
 
 
-#if __name__ == '__main__':
-#    rd_xls_name = 'addr.xls'
-#    wr_xls_name = 'result.xls'
-#    url_list = get_url(rd_xls_name)
-#    for i in range(len(url_list)):
-#        url_pro(url_list[i])
-#    write_xls(wr_xls_name)
+if __name__ == '__main__':
+    rd_xls_name = 'addr.xls'
+    wr_xls_name = 'result.xls'
+    url_list = get_url(rd_xls_name)
+    for i in range(len(url_list)):
+        url_pro(url_list[i])
+    write_xls(wr_xls_name)
 
 
-url_pro(dp_url)
+#url_pro(dp_url)
 #write_xls()
 #get_url('addr.xls')
 
